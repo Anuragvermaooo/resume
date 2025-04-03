@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratings & Comments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://th.bing.com/th/id/OIP.zPhYOZRV7NV6kYmFFIzAAwHaEJ?w=626&h=351&rs=1&pid=ImgDetMain') no-repeat center center/cover;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: white;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .home-btn {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 5px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.home-btn:hover {
+    background: cyan;
+    color: black;
+}
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        .comment-box, .comments-section {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: limegreen;
+            padding: 10px 20px;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .admin-delete {
+            background: red;
+            margin-top: 20px;
+            display: none;
+        }
+        .comment-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            position: relative;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Ratings</div> 
+        <nav>
+            <a href="index.html" class="home-btn">Home</a>
+        </nav>
+    </header>
+
+    <section class="container">
+        <div class="comment-box">
+            <h2>Leave a Review</h2>
+            <input type="text" id="user-name" placeholder="Your Name" required>
+            <textarea id="user-comment" placeholder="Your Comment" required></textarea>
+            <button onclick="addComment()">Submit</button>
+        </div>
+        <div class="comments-section" id="comments-section">
+            <h2>All Reviews</h2>
+            <ul id="comment-list"></ul>
+            <button id="admin-delete" onclick="clearAllComments()" class="admin-delete">Delete All Comments (Admin)</button>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadComments();
+            document.getElementById("user-name").addEventListener("input", checkAdmin);
+        });
+
+        function checkAdmin() {
+            let adminCode = "Anuragverma8303425374";
+            let currentUserName = document.getElementById("user-name").value;
+            document.getElementById("admin-delete").style.display = (currentUserName === adminCode) ? "block" : "none";
+        }
+
+        function addComment() {
+            let name = document.getElementById("user-name").value.trim();
+            let comment = document.getElementById("user-comment").value.trim();
+            if (name === "" || comment === "") {
+                alert("Please enter both name and comment.");
+                return;
+            }
+            let userId = name.toLowerCase().replace(/\s/g, "");
+            let commentObj = { userId, name, comment, date: new Date().toLocaleString() };
+            let comments = JSON.parse(localStorage.getItem("comments")) || [];
+            comments.push(commentObj);
+            localStorage.setItem("comments", JSON.stringify(comments));
+            document.getElementById("user-name").value = "";
+            document.getElementById("user-comment").value = "";
+            loadComments();
+        }
+
+        function loadComments() {
+            let comments = JSON.parse(localStorage.getItem("comments")) || [];
+            let commentList = document.getElementById("comment-list");
+            commentList.innerHTML = "";
+            let currentUserId = document.getElementById("user-name").value.toLowerCase().replace(/\s/g, "");
+            comments.forEach((comment, index) => {
+                let li = document.createElement("li");
+                li.classList.add("comment-item");
+                li.innerHTML = `<strong>${comment.name}</strong> (${comment.date})<br>${comment.comment}`;
+                if (comment.userId === currentUserId) {
+                    let deleteBtn = document.createElement("button");
+                    deleteBtn.classList.add("delete-btn");
+                    deleteBtn.innerText = "Delete";
+                    deleteBtn.onclick = function() { deleteComment(index); };
+                    li.appendChild(deleteBtn);
+                }
+                commentList.appendChild(li);
+            });
+            checkAdmin();
+        }
+
+        function deleteComment(index) {
+            let comments = JSON.parse(localStorage.getItem("comments")) || [];
+            comments.splice(index, 1);
+            localStorage.setItem("comments", JSON.stringify(comments));
+            loadComments();
+        }
+
+        function clearAllComments() {
+            if (confirm("Are you sure you want to delete all comments?")) {
+                localStorage.removeItem("comments");
+                loadComments();
+            }
+        }
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem("comments")) {
+        generateRandomComments();
+    }
+    loadComments();
+});
+
+function generateRandomComments() {
+    let names = ["Kajal", "Suraj", "Rakesh", "Vikas", "Harsh", "Prachi", "Anchal", "Amit", "Neha", "Pooja", "Rahul", "Sanjay", "Manoj", "Ankit", "Tushar", "Meena", "Jyoti", "Divya", "Rohan", "Deepak", "Suresh", "Alok", "Sunil", "Ritu", "Payal", "Gaurav", "Kunal", "Priya", "Shweta", "Monika", "Nisha", "Abhishek", "Vivek", "Yash", "Sachin", "Ravi", "Arvind", "Shubham", "Varun", "Sagar", "Rohit", "Sonia", "Swati", "Rajesh", "Vandana", "Anjali", "Komal", "Dhruv", "Kishan", "Sakshi", "Hemant", "Anurag", "Pradeep", "Chetan", "Jitendra", "Tarun", "Sonu", "Ramesh", "Bhavesh", "Vinod", "Akhilesh", "Shashank", "Naveen", "Deepika", "Himanshu", "Kartik", "Tanmay", "Aditya", "Keshav", "Krishna", "Ishita", "Dev", "Nitin", "Umesh", "Pankaj", "Rajiv", "Bobby", "Jatin", "Vikrant", "Chirag", "Ashish", "Dheeraj", "Raj", "Gulshan", "Sidharth", "Lavanya", "Ayush", "Hardik", "Irfan", "Santosh", "Sandeep", "Aakash", "Parth", "Bhaskar", "Ekta", "Simran", "Meenal", "Asha"];
+    
+    let comments = [
+        "Bahut acchi website hai!", "Mujhe yeh design pasand aaya!", "Awesome work!", "Great UI!", "Loved the simplicity!", "User-friendly interface!", "Keep up the good work!", "Best website ever!", "Fantastic features!", "Very useful!", "Great for everyone!", "Highly recommended!", "Superb concept!", "Nice colors and layout!", "Perfectly executed!", "Simple and effective!", "I love this site!", "Very creative design!", "Outstanding performance!", "Looks very professional!"
+    ];
+    
+    let generatedComments = [];
+    for (let i = 0; i < 100; i++) {
+        let randomName = names[Math.floor(Math.random() * names.length)];
+        let randomComment = comments[Math.floor(Math.random() * comments.length)];
+        let randomDate = generateRandomDate("2025-02-01", "2025-03-30");
+        generatedComments.push({ userId: randomName.toLowerCase(), name: randomName, comment: randomComment, date: randomDate });
+    }
+    
+    localStorage.setItem("comments", JSON.stringify(generatedComments));
+}
+
+function generateRandomDate(start, end) {
+    let startDate = new Date(start);
+    let endDate = new Date(end);
+    let randomTime = startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime());
+    return new Date(randomTime).toLocaleString();
+}
+
+    </script>
+
+
+</body>
+</html>
